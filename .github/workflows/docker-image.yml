@@ -1,18 +1,42 @@
-name: Docker Image CI
-
+name: build java
 on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 0 * * 1"
   push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
-
+    branches:
+      - master
+    paths:
+      - java-11/**
+      - java-17/**-
 jobs:
-
-  build:
-
+  push:
+    name: "yolks:java_${{ matrix.tag }}"
     runs-on: ubuntu-latest
-
+    strategy:
+      fail-fast: false
+      matrix:
+        tag:
+          - java-11
+          - java-17
     steps:
-    - uses: actions/checkout@v2
-    - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag my-image-name:$(date +%s)
+      - uses: actions/checkout@v2
+      - uses: docker/setup-qemu-action@v1
+      - uses: docker/setup-buildx-action@v1
+        with:
+          version: "v0.0.1"
+          buildkitd-flags: --debug
+      - uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.REGISTRY_TOKEN }}
+      - uses: docker/build-push-action@v2
+        with:
+          context: ./
+          file: ./${{ matrix.tag }}/Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            ghcr.io/dancebunny98/pterodactyl-core:java-17${{ matrix.tag }}
+            ghcr.io/dancebunny98/pterodactyl-core:java-11${{ matrix.tag }}
