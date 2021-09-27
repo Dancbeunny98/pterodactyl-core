@@ -1,4 +1,4 @@
-FROM openjdk:17-jdk-buster
+FROM openjdk:11-jdk-buster
 
 RUN printf "deb [arch=amd64] https://apt.bell-sw.com/ stable main" > /etc/apt/sources.list.d/bellsoft.list
 
@@ -9,7 +9,7 @@ RUN wget -q -O - https://download.bell-sw.com/pki/GPG-KEY-bellsoft | apt-key add
     && apt install openssl -y \
     && apt install lib32z1 -y \
     && apt install bellsoft-java11-full -y \
-    && ln -s /usr/lib/jvm/bellsoft-java17-full-amd64/bin/java /usr/lib/jvm/default-java \
+    && ln -s /usr/lib/jvm/bellsoft-java11-full-amd64/bin/java /usr/lib/jvm/default-java \
     && apt install -y openjfx curl ca-certificates openssl git tar bash sqlite fontconfig \
     && adduser -D -h /home/container container
 
